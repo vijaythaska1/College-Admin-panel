@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from "react";
 import image from "../assets/fall-zoom-5.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from 'react-redux'
-import Joi from 'joi';
+import { useDispatch } from 'react-redux';
 import {
     Card,
     CardHeader,
@@ -13,58 +12,35 @@ import {
     Typography,
     Button,
 } from "@material-tailwind/react";
+import createValidationSchema, { validateField, validateForm } from 'flexible-form-validation';
 import APIS from "../axios/Index.js";
-// import helper from "../utility/helper.js";
+// import helper from "../utility/helper.js";npm i flexible-form-validation
 
 function Loginpage() {
     const [data, setData] = useState({ email: "", password: "" });
     const [errors, setErrors] = useState({});
     const [eye, setEye] = useState(0);
     const dispatch = useDispatch();
+
     const navigate = useNavigate();
 
-    const validationSchema = {
-        email: Joi.string().email({ tlds: { allow: false } }).required().messages({
-            'string.email': 'Email must be a valid email',
-            'string.empty': 'Email is not allowed to be empty',
-            'any.required': 'Email is required and cannot be empty'
-        }),
-        password: Joi.string().required().messages({
-            'string.empty': 'Password is not allowed to be empty',
-            'any.required': 'Password is required'
-        }),
-    };
-
-    const validateField = useCallback((name, value) => {
-        try {
-            Joi.attempt(value, validationSchema[name]);
-            setErrors(prev => ({ ...prev, [name]: undefined }));
-        } catch (error) {
-            setErrors(prev => ({ ...prev, [name]: error.message }));
-        }
-    }, [validationSchema]);
-
-    const validateForm = useCallback(() => {
-        const schema = Joi.object(validationSchema);
-        try {
-            schema.validateAsync(data, { abortEarly: false });
-            setErrors({});
-            return true;
-        } catch (error) {
-            const newErrors = {};
-            error.details.forEach((detail) => {
-                newErrors[detail.path[0]] = detail.message;
-            });
-            setErrors(newErrors);
-            return false;
-        }
-    }, [data,validationSchema]);
+    const validationSchema = createValidationSchema([
+        { name: 'email', type: 'email', required: true,  messages: {
+            'string.empty': 'is not allowed to be empty',
+            'string.max': 'Username cannot exceed 20 characters'
+          } },
+        { name: 'password', type: 'string', required: true, min: 6 }
+    ]);
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const isValid = validateForm();
-        if (!isValid) return;
+
         try {
+            const { isValid, errors } = validateForm(validationSchema, data);
+            if (!isValid) {
+                setErrors(errors);
+                return;
+            }
             const res = await dispatch(APIS.authLogin(data));
             if (res.payload.data.success === true) {
                 navigate("/Dashboard");
@@ -80,13 +56,12 @@ function Loginpage() {
         setEye(prev => prev === 1 ? 0 : 1);
     };
 
-    const handleChange = (event) => {
+    const handleChange = useCallback((event) => {
         const { name, value } = event.target;
         setData(prev => ({ ...prev, [name]: value }));
-        setTimeout(() => {
-            validateField(name, value);
-        }, 1000);
-    };
+        const fieldError = validateField(validationSchema, name, value);
+        setTimeout(() => {setErrors(prev => ({ ...prev, [name]: fieldError[name] }));}, 2000);
+    }, [validationSchema]);
 
     return (
         <section
@@ -113,13 +88,14 @@ function Loginpage() {
                             autoComplete="username"
                             value={data.email}
                             onChange={handleChange}
-                            error={Boolean(errors.email)}
+                        // error={Boolean(errors.email)}
                         />
                         {errors.email && (
                             <Typography variant="small" color="red">
                                 {errors.email}
                             </Typography>
                         )}
+
                         <div className="relative flex">
                             <Input
                                 label="Password"
@@ -129,7 +105,7 @@ function Loginpage() {
                                 autoComplete="current-password"
                                 value={data.password}
                                 onChange={handleChange}
-                                error={Boolean(errors.password)}
+                            // error={Boolean(errors.password)}
                             />
                             <span className="material-symbols-outlined flex absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={handleEye}>
                                 {eye === 1 ? "visibility" : "visibility_off"}
@@ -148,11 +124,11 @@ function Loginpage() {
                         <Button type="submit" variant="gradient" fullWidth>
                             Sign In
                         </Button>
-                        {errors.general && (
+                        {/* {errors.general && (
                             <Typography variant="small" color="red" className="mt-2 text-center">
                                 {errors.general}
                             </Typography>
-                        )}
+                        )} */}
                         <Typography variant="small" className="mt-6 flex justify-center">
                             Don't have an account?
                             <Link

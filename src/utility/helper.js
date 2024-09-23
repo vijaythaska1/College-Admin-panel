@@ -15,7 +15,7 @@ export default {
         return true;
     },
 
-    handleChange : (event ,setData) => {
+    handleChange: (event, setData) => {
         setData((prevalue) => {
             return {
                 ...prevalue,
