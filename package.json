@@ -1,5 +1,5 @@
 {
-  "name": "admin",
+  "name": "college-admin-panel",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -76,5 +76,15 @@
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vijaythaska1/file-uploader-packages.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vijaythaska1/file-uploader-packages/issues"
   }
 }
