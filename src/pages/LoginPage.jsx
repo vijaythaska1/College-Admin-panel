@@ -25,10 +25,12 @@ function Loginpage() {
     const navigate = useNavigate();
 
     const validationSchema = createValidationSchema([
-        { name: 'email', type: 'email', required: true,  messages: {
-            'string.empty': 'is not allowed to be empty',
-            'string.max': 'Username cannot exceed 20 characters'
-          } },
+        {
+            name: 'email', type: 'email', required: true, messages: {
+                'string.empty': 'is not allowed to be empty',
+                'string.max': 'Username cannot exceed 20 characters'
+            }
+        },
         { name: 'password', type: 'string', required: true, min: 6 }
     ]);
 
@@ -60,7 +62,7 @@ function Loginpage() {
         const { name, value } = event.target;
         setData(prev => ({ ...prev, [name]: value }));
         const fieldError = validateField(validationSchema, name, value);
-        setTimeout(() => {setErrors(prev => ({ ...prev, [name]: fieldError[name] }));}, 2000);
+        setTimeout(() => { setErrors(prev => ({ ...prev, [name]: fieldError[name] })); }, 2000);
     }, [validationSchema]);
 
     return (
